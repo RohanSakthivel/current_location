@@ -88,17 +88,31 @@
         .nearest-warehouse-item {
             font-size: 1rem;
             padding: 10px;
-            margin: 5px 0;
-            background-color: #eef6ff;
+            margin: 10px 0;
+            background-color: #f8f9fa;
             border-left: 5px solid #007bff;
             border-radius: 8px;
+            position: relative;
         }
 
-        #productMessage {
+        .product-card {
+            border: 1px solid #007bff;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-card h3 {
             font-size: 1.2rem;
-            font-weight: bold;
-            color: #28a745;
-            margin-top: 20px;
+            color: #007bff;
+        }
+
+        .product-card p {
+            margin: 0;
+            font-size: 1rem;
+            color: #333;
         }
     </style>
 </head>
@@ -207,13 +221,14 @@
 
             // Check if the warehouse is within 4 km to display products
             if (distance <= 4) {
-                const productList = document.createElement('ul');
                 warehouse.products.forEach(product => {
-                    const productItem = document.createElement('li');
-                    productItem.textContent = product; // Add each product to the list
-                    productList.appendChild(productItem);
+                    const productCard = document.createElement('div');
+                    productCard.className = 'product-card';
+                    productCard.innerHTML = `<h3>${product}</h3><p>Available at ${warehouse.name}</p>`;
+                    warehouseItem.appendChild(productCard); // Append product card to the warehouse item
                 });
-                warehouseItem.appendChild(productList); // Append product list to the warehouse item
+            } else {
+                warehouseItem.innerHTML += `<p>No products available within 4 km.</p>`;
             }
 
             list.appendChild(warehouseItem);
