@@ -117,18 +117,7 @@
             color: #333;
         }
 
-        .add-to-cart {
-            background-color: #ff9800;
-            border: none;
-            padding: 8px 12px;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .add-to-cart:hover {
-            background-color: #e68900;
-        }
+        
 
         .cart {
             margin-top: 20px;
@@ -185,7 +174,7 @@
   border: 1px solid white;
   width: var(--plus_sideLength);
   height: var(--plus_sideLength);
-  background-color: #000000;
+  background-color: #ff9800;
   overflow: hidden;
 }
 
@@ -225,12 +214,12 @@
 }
 
 .plusButton:hover>.plusIcon {
-  fill: black;
+  fill: #ff9800;
   transform: rotate(180deg);
 }
 
 .plusButton:focus-visible>.plusIcon {
-  fill: black;
+  fill: #ff9800;
   transform: rotate(180deg);
 }
     </style>
@@ -358,7 +347,6 @@
                     productCard.className = 'product-card';
                     productCard.innerHTML = `
                         <h3>${product}</h3>
-                        <button class="add-to-cart" onclick="addToCart('${product}')">Add to Cart</button>
                         <div tabindex="0" class="plusButton"onclick="addToCart('${product}')">
                         <svg class="plusIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30">
                         <g mask="url(#mask0_21_345)">
