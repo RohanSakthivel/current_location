@@ -3,31 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Get Accurate Location</title>
+    <title>Warehouse Product Delivery</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f4f7;
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            color: #333;
         }
 
         .container {
             text-align: center;
-            background-color: white;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
         }
 
         h2 {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             margin-bottom: 20px;
         }
 
@@ -55,6 +46,10 @@
             margin-top: 20px;
             padding: 10px 20px;
             background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
         }
 
         #mapButton:hover {
@@ -70,36 +65,93 @@
         .product-list {
             margin-top: 20px;
             display: none;
-            text-align: left;
+            text-align: center;
         }
 
-        .product {
-            background: #f9f9f9;
-            padding: 10px;
-            margin: 5px 0;
+        .product-card {
+            display: inline-block;
+            background: white;
             border: 1px solid #ddd;
-            border-radius: 5px;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px;
+            width: 200px;
+            text-align: center;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
         }
+
+        .product-card h3 {
+            margin: 10px 0;
+        }
+
+        .product-card button {
+            background-color: #007bff;
+        }
+
+        .cart {
+            margin-top: 30px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .cart h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .cart ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .cart li {
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+
+        .warehouse-info {
+            font-size: 1.2rem;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Get Your Location</h2>
+    <h2>Warehouse Product Delivery</h2>
     <button onclick="getLocation()">Get Location</button>
     <p id="locationOutput"></p>
     <button id="mapButton" style="display:none;" onclick="openMap()">Open in Google Maps</button>
     <p id="productMessage" style="display:none;"></p>
+
+    <!-- Nearest Warehouse Info -->
+    <p id="nearestWarehouse" class="warehouse-info"></p>
+
     <div class="product-list" id="productList"></div>
+
+    <!-- My Cart -->
+    <div class="cart" id="cart">
+        <h3>My Cart</h3>
+        <ul id="cartItems"></ul>
+    </div>
 </div>
 
 <script>
-    const warehouseLocation = {
-        latitude: 10.8762974,
-        longitude: 76.9817564
-    };
+    const warehouseLocations = [
+        { name: 'Main Warehouse', latitude: 10.8762974, longitude: 76.9817564 },
+        { name: 'Kwality Warehouse', latitude: 10.8847709, longitude: 76.9982925 }
+    ];
 
     let latitude, longitude;
+    let nearestWarehouse = null;
+    let cart = [];
 
     // Sample product data
     const products = [
@@ -128,7 +180,7 @@
         document.getElementById("locationOutput").innerHTML = 
             `Latitude: ${latitude.toFixed(6)}<br>Longitude: ${longitude.toFixed(6)}`;
         document.getElementById("mapButton").style.display = "inline-block"; // Show the "Open in Google Maps" button
-        checkDistance();
+        findNearestWarehouse();
     }
 
     function showError(error) {
@@ -161,20 +213,27 @@
         window.open(mapUrl, '_blank'); // Open the URL in a new tab or app
     }
 
-    function checkDistance() {
-        const distance = calculateDistance(latitude, longitude, warehouseLocation.latitude, warehouseLocation.longitude);
-        const messageElement = document.getElementById("productMessage");
-        const productListElement = document.getElementById("productList");
+    function findNearestWarehouse() {
+        let shortestDistance = Infinity;
 
-        if (distance <= 4) {
-            messageElement.innerHTML = "Products are available for delivery!";
+        warehouseLocations.forEach(warehouse => {
+            const distance = calculateDistance(latitude, longitude, warehouse.latitude, warehouse.longitude);
+            if (distance < shortestDistance) {
+                shortestDistance = distance;
+                nearestWarehouse = warehouse;
+            }
+        });
+
+        if (shortestDistance <= 4) {
+            document.getElementById("nearestWarehouse").innerHTML = `Nearest Warehouse: ${nearestWarehouse.name} (${shortestDistance.toFixed(2)} km away)`;
+            document.getElementById("productMessage").innerHTML = "Products are available for delivery!";
             displayProducts();
         } else {
-            messageElement.innerHTML = "Sorry, we do not deliver to your location.";
-            productListElement.style.display = "none"; // Hide the product list
+            document.getElementById("nearestWarehouse").innerHTML = "No warehouse within 4 km.";
+            document.getElementById("productMessage").innerHTML = "Sorry, we do not deliver to your location.";
         }
 
-        messageElement.style.display = "block"; // Show the product message
+        document.getElementById("productMessage").style.display = "block";
     }
 
     function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -197,15 +256,27 @@
     function displayProducts() {
         const productListElement = document.getElementById("productList");
         productListElement.innerHTML = ""; // Clear previous products
-        products.forEach(product => {
+        products.forEach((product, index) => {
             const productDiv = document.createElement("div");
-            productDiv.classList.add("product");
-            productDiv.innerHTML = `${product.name} - ${product.price}`;
+            productDiv.classList.add("product-card");
+            productDiv.innerHTML = `<h3>${product.name}</h3><p>${product.price}</p><button onclick="addToCart(${index})">Add to Cart</button>`;
             productListElement.appendChild(productDiv);
         });
-        productListElement.style.display = "block"; // Show the product list
+        productListElement.style.display = "block"; // Show product list
     }
 
+    function addToCart(index) {
+        const cartElement = document.getElementById("cartItems");
+        const cartDiv = document.getElementById("cart");
+        const product = products[index];
+        cart.push(product);
+
+        const listItem = document.createElement("li");
+        listItem.innerText = `${product.name} - ${product.price}`;
+        cartElement.appendChild(listItem);
+
+        cartDiv.style.display = "block"; // Show cart section
+    }
 </script>
 
 </body>
