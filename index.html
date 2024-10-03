@@ -113,8 +113,19 @@
     }
 
     function openMap() {
-        const mapUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
-        window.open(mapUrl, '_blank'); // Open Google Maps in a new tab
+        // Detect if the user is on a mobile device
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        let mapUrl;
+        
+        if (isMobile) {
+            // Use geo: URI scheme for mobile devices to open Google Maps directly
+            mapUrl = `geo:${latitude},${longitude}?q=${latitude},${longitude}`;
+        } else {
+            // Use https scheme for desktops
+            mapUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+        }
+        
+        window.open(mapUrl, '_blank'); // Open the URL in a new tab or app
     }
 </script>
 
