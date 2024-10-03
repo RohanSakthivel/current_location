@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zolow - Warehouse Product Delivery</title>
     <style>
+        /* Similar styling as before for theme and layout */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f7f9fc;
+            background-color: #fff;
             margin: 0;
             padding: 0;
             color: #333;
@@ -18,10 +19,22 @@
             text-align: center;
         }
 
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ff9800;
+            padding: 15px;
+        }
+
+        .header img {
+            max-width: 150px;
+        }
+
         h1 {
             font-size: 2rem;
             margin-bottom: 20px;
-            color: #007bff;
+            color: #ff9800;
         }
 
         h2 {
@@ -32,7 +45,7 @@
         button {
             padding: 12px 25px;
             font-size: 1.2rem;
-            background-color: #28a745;
+            background-color: #ff9800;
             color: white;
             border: none;
             border-radius: 8px;
@@ -43,7 +56,7 @@
         }
 
         button:hover {
-            background-color: #218838;
+            background-color: #e68900;
         }
 
         #locationOutput {
@@ -67,85 +80,6 @@
             background-color: #0056b3;
         }
 
-        .warehouse-info {
-            font-size: 1.1rem;
-            color: #007bff;
-            margin-top: 20px;
-        }
-
-        #productMessage {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #28a745;
-            margin-top: 20px;
-        }
-
-        .product-list {
-            margin-top: 20px;
-            display: none;
-            text-align: center;
-        }
-
-        .product-card {
-            display: inline-block;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 10px;
-            width: 85%;
-            max-width: 300px;
-            text-align: center;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .product-card h3 {
-            margin: 10px 0;
-            font-size: 1.2rem;
-        }
-
-        .product-card p {
-            font-size: 1rem;
-            margin-bottom: 10px;
-        }
-
-        .product-card button {
-            background-color: #007bff;
-            padding: 10px 20px;
-            font-size: 1rem;
-            border-radius: 5px;
-        }
-
-        .product-card button:hover {
-            background-color: #0056b3;
-        }
-
-        .cart {
-            margin-top: 30px;
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            display: none;
-        }
-
-        .cart h3 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-        }
-
-        .cart ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .cart li {
-            padding: 10px;
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            margin-bottom: 10px;
-        }
-
         .nearest-warehouse-list {
             text-align: left;
             margin-top: 20px;
@@ -160,33 +94,47 @@
             border-radius: 8px;
         }
 
-        #paymentSuccess {
-            display: none;
-            margin-top: 20px;
-            font-size: 1.4rem;
+        #productMessage {
+            font-size: 1.2rem;
             font-weight: bold;
             color: #28a745;
-        }
-
-        #shopButton {
-            display: none;
             margin-top: 20px;
-            padding: 12px 25px;
-            background-color: #ff9800;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 300px;
         }
 
-        #shopButton:hover {
-            background-color: #e68900;
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000; /* Ensure loader is on top */
         }
 
+        .loader {
+            border: 16px solid #f3f3f3; /* Light grey */
+            border-top: 16px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
+
+<div class="header">
+    <!-- Logo Image -->
+    <img src="logo.png" alt="Zolow Logo">
+</div>
 
 <div class="container">
     <h1>Zolow</h1>
@@ -194,46 +142,39 @@
     <button onclick="getLocation()">Get Location</button>
     <p id="locationOutput"></p>
     <button id="mapButton" onclick="openMap()">Open in Google Maps</button>
-    <p id="productMessage"></p>
 
     <div id="nearestWarehouses" class="nearest-warehouse-list"></div>
+</div>
 
-    <div class="product-list" id="productList"></div>
-
-    <!-- My Cart -->
-    <div class="cart" id="cart">
-        <h3>My Cart</h3>
-        <ul id="cartItems"></ul>
-        <button onclick="makePayment()">Proceed to Payment</button>
-    </div>
-
-    <!-- Payment Success Message -->
-    <p id="paymentSuccess">Payment Successful! Thank you for your purchase.</p>
-
-    <!-- Shop Button -->
-    <button id="shopButton" onclick="goBackToShop()">Continue Shopping</button>
-
+<div id="loader" style="display: none;">
+    <div class="loader"></div>
 </div>
 
 <script>
     const warehouseLocations = [
-        { name: 'Main Warehouse', latitude: 10.8762974, longitude: 76.9817564 },
-        { name: 'Kwality Warehouse', latitude: 10.8847709, longitude: 76.9982925 }
+        { 
+            name: 'Main Warehouse', 
+            latitude: 10.8762974, 
+            longitude: 76.9817564
+        },
+        { 
+            name: 'Kwality Warehouse', 
+            latitude: 10.8847709, 
+            longitude: 76.9982925
+        },
+        { 
+            name: 'Other Warehouse', 
+            latitude: 10.879, 
+            longitude: 76.992 
+        }
     ];
 
     let latitude, longitude;
-    let cart = [];
-
-    // Sample product data
-    const products = [
-        { name: "Product 1", price: "$10" },
-        { name: "Product 2", price: "$15" },
-        { name: "Product 3", price: "$20" },
-        { name: "Product 4", price: "$25" },
-        { name: "Product 5", price: "$30" },
-    ];
 
     function getLocation() {
+        // Show the loader when starting to fetch location
+        document.getElementById("loader").style.display = "flex";
+        
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(showPosition, showError, {
                 enableHighAccuracy: true,
@@ -242,6 +183,8 @@
             });
         } else {
             document.getElementById("locationOutput").innerHTML = "Geolocation is not supported by this browser.";
+            // Hide the loader if geolocation is not supported
+            document.getElementById("loader").style.display = "none";
         }
     }
 
@@ -252,6 +195,8 @@
             `Latitude: ${latitude.toFixed(6)}<br>Longitude: ${longitude.toFixed(6)}`;
         document.getElementById("mapButton").style.display = "inline-block";
         findNearestWarehouses();
+        // Hide the loader after position is obtained
+        document.getElementById("loader").style.display = "none";
     }
 
     function showError(error) {
@@ -269,105 +214,51 @@
                 document.getElementById("locationOutput").innerHTML = "An unknown error occurred.";
                 break;
         }
-    }
-
-    function openMap() {
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        let mapUrl;
-
-        if (isMobile) {
-            mapUrl = `geo:${latitude},${longitude}?q=${latitude},${longitude}`;
-        } else {
-            mapUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
-        }
-
-        window.open(mapUrl, '_blank');
+        // Hide the loader on error
+        document.getElementById("loader").style.display = "none";
     }
 
     function findNearestWarehouses() {
-        const nearbyWarehouses = warehouseLocations
+        const nearestWarehouses = warehouseLocations
             .map(warehouse => ({
                 ...warehouse,
-                distance: calculateDistance(latitude, longitude, warehouse.latitude, warehouse.longitude)
+                distance: getDistanceFromLatLonInKm(latitude, longitude, warehouse.latitude, warehouse.longitude)
             }))
-            .filter(warehouse => warehouse.distance <= 4)
-            .sort((a, b) => a.distance - b.distance); // Sort by distance
+            .sort((a, b) => a.distance - b.distance)
+            .slice(0, 3); // Get the three nearest warehouses
 
-        if (nearbyWarehouses.length > 0) {
-            displayNearestWarehouses(nearbyWarehouses);
-            document.getElementById("productMessage").innerText = "Products are available for delivery!";
-            displayProducts();
-        } else {
-            document.getElementById("productMessage").innerText = "No warehouses nearby within 4km.";
-        }
-    }
+        const warehouseList = document.getElementById("nearestWarehouses");
+        warehouseList.innerHTML = ""; // Clear previous results
 
-    function displayNearestWarehouses(warehouses) {
-        const nearestWarehousesElement = document.getElementById("nearestWarehouses");
-        nearestWarehousesElement.innerHTML = "<h3>Nearby Warehouses</h3>";
-        warehouses.forEach(warehouse => {
+        nearestWarehouses.forEach(warehouse => {
             const warehouseItem = document.createElement("div");
-            warehouseItem.classList.add("nearest-warehouse-item");
-            warehouseItem.innerHTML = `${warehouse.name} - ${warehouse.distance.toFixed(2)} km away`;
-            nearestWarehousesElement.appendChild(warehouseItem);
+            warehouseItem.className = "nearest-warehouse-item";
+            warehouseItem.innerHTML = `${warehouse.name} - ${warehouse.distance.toFixed(2)} km`;
+            warehouseList.appendChild(warehouseItem);
         });
     }
 
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371; // Radius of the Earth in km
-        const dLat = (lat2 - lat1) * (Math.PI / 180);
-        const dLon = (lon2 - lon1) * (Math.PI / 180);
-        const a = 
+    function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Radius of the earth in km
+        const dLat = deg2rad(lat2 - lat1); // deg2rad below
+        const dLon = deg2rad(lon2 - lon1);
+        const a =
             Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
+            Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
             Math.sin(dLon / 2) * Math.sin(dLon / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; // Distance in km
+        const distance = R * c; // Distance in km
+        return distance;
     }
 
-    function displayProducts() {
-        const productListElement = document.getElementById("productList");
-        productListElement.innerHTML = ""; // Clear previous products
-
-        products.forEach((product, index) => {
-            const productDiv = document.createElement("div");
-            productDiv.classList.add("product-card");
-            productDiv.innerHTML = `
-                <h3>${product.name}</h3>
-                <p>Price: ${product.price}</p>
-                <button onclick="addToCart(${index})">Add to Cart</button>`;
-            productListElement.appendChild(productDiv);
-        });
-        productListElement.style.display = "block"; // Show product list
+    function deg2rad(deg) {
+        return deg * (Math.PI / 180);
     }
 
-    function addToCart(index) {
-        const cartElement = document.getElementById("cartItems");
-        const cartDiv = document.getElementById("cart");
-        const product = products[index];
-        cart.push(product);
-
-        const listItem = document.createElement("li");
-        listItem.innerText = `${product.name} - ${product.price}`;
-        cartElement.appendChild(listItem);
-
-        cartDiv.style.display = "block"; // Show cart section
-    }
-
-    function makePayment() {
-        document.getElementById("paymentSuccess").style.display = "block";
-        document.getElementById("shopButton").style.display = "inline-block";
-        document.getElementById("cart").style.display = "none"; // Hide cart after payment
-    }
-
-    function goBackToShop() {
-        document.getElementById("paymentSuccess").style.display = "none";
-        document.getElementById("shopButton").style.display = "none";
-        document.getElementById("productList").style.display = "block"; // Show product list again
-        cart = []; // Clear cart after purchase
-        document.getElementById("cartItems").innerHTML = ""; // Clear cart display
+    function openMap() {
+        const mapUrl = `https://www.google.com/maps/@${latitude},${longitude},15z`;
+        window.open(mapUrl, '_blank');
     }
 </script>
-
 </body>
 </html>
