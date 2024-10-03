@@ -61,6 +61,12 @@
             background-color: #0056b3;
         }
 
+        #productMessage {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #28a745;
+        }
+
     </style>
 </head>
 <body>
@@ -70,9 +76,15 @@
     <button onclick="getLocation()">Get Location</button>
     <p id="locationOutput"></p>
     <button id="mapButton" style="display:none;" onclick="openMap()">Open in Google Maps</button>
+    <p id="productMessage" style="display:none;"></p>
 </div>
 
 <script>
+    const warehouseLocation = {
+        latitude: 10.8762974,
+        longitude: 76.9817564
+    };
+
     let latitude, longitude;
 
     function getLocation() {
@@ -93,6 +105,7 @@
         document.getElementById("locationOutput").innerHTML = 
             `Latitude: ${latitude.toFixed(6)}<br>Longitude: ${longitude.toFixed(6)}`;
         document.getElementById("mapButton").style.display = "inline-block";  // Show the "Open in Google Maps" button
+        checkDistance();
     }
 
     function showError(error) {
@@ -113,20 +126,48 @@
     }
 
     function openMap() {
-        // Detect if the user is on a mobile device
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         let mapUrl;
         
         if (isMobile) {
-            // Use geo: URI scheme for mobile devices to open Google Maps directly
             mapUrl = `geo:${latitude},${longitude}?q=${latitude},${longitude}`;
         } else {
-            // Use https scheme for desktops
             mapUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
         }
         
         window.open(mapUrl, '_blank'); // Open the URL in a new tab or app
     }
+
+    function checkDistance() {
+        const distance = calculateDistance(latitude, longitude, warehouseLocation.latitude, warehouseLocation.longitude);
+        const messageElement = document.getElementById("productMessage");
+
+        if (distance <= 4) {
+            messageElement.innerHTML = "Products are available for delivery!";
+        } else {
+            messageElement.innerHTML = "Sorry, we do not deliver to your location.";
+        }
+
+        messageElement.style.display = "block"; // Show the product message
+    }
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Radius of the Earth in km
+        const dLat = degreesToRadians(lat2 - lat1);
+        const dLon = degreesToRadians(lon2 - lon1);
+        const a = 
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(degreesToRadians(lat1)) * Math.cos(degreesToRadians(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c; // Distance in km
+        return distance;
+    }
+
+    function degreesToRadians(degrees) {
+        return degrees * (Math.PI / 180);
+    }
+
 </script>
 
 </body>
