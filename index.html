@@ -52,7 +52,6 @@
             cursor: pointer;
             width: 90%;
             max-width: 300px;
-            margin: 10px 0;
         }
 
         button:hover {
@@ -270,23 +269,29 @@
     }
 
     function findNearestWarehouses() {
+        const warehousesWithDistances = warehouseLocations.map(warehouse => {
+            const distance = calculateDistance(latitude, longitude, warehouse.latitude, warehouse.longitude);
+            return { ...warehouse, distance }; // Add distance to each warehouse object
+        });
+
+        // Sort warehouses by distance (ascending order)
+        warehousesWithDistances.sort((a, b) => a.distance - b.distance);
+
         const list = document.getElementById('nearestWarehouses');
         list.innerHTML = ''; // Clear previous results
 
-        warehouseLocations.forEach(warehouse => {
-            const distance = calculateDistance(latitude, longitude, warehouse.latitude, warehouse.longitude);
+        warehousesWithDistances.forEach(warehouse => {
             const warehouseItem = document.createElement('div');
             warehouseItem.className = 'nearest-warehouse-item';
-            warehouseItem.innerHTML = `<strong>${warehouse.name}</strong><br>Distance: ${distance.toFixed(2)} km`;
+            warehouseItem.innerHTML = `<strong>${warehouse.name}</strong><br>Distance: ${warehouse.distance.toFixed(2)} km`;
 
             // Check if the warehouse is within 4 km to display products
-            if (distance <= 4) {
+            if (warehouse.distance <= 4) {
                 warehouse.products.forEach(product => {
                     const productCard = document.createElement('div');
                     productCard.className = 'product-card';
                     productCard.innerHTML = `
                         <h3>${product}</h3>
-                        <p>Available at ${warehouse.name}</p>
                         <button class="add-to-cart" onclick="addToCart('${product}')">Add to Cart</button>
                     `;
                     warehouseItem.appendChild(productCard);
