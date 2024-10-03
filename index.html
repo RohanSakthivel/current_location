@@ -67,6 +67,19 @@
             color: #28a745;
         }
 
+        .product-list {
+            margin-top: 20px;
+            display: none;
+            text-align: left;
+        }
+
+        .product {
+            background: #f9f9f9;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -77,6 +90,7 @@
     <p id="locationOutput"></p>
     <button id="mapButton" style="display:none;" onclick="openMap()">Open in Google Maps</button>
     <p id="productMessage" style="display:none;"></p>
+    <div class="product-list" id="productList"></div>
 </div>
 
 <script>
@@ -86,6 +100,15 @@
     };
 
     let latitude, longitude;
+
+    // Sample product data
+    const products = [
+        { name: "Product 1", price: "$10" },
+        { name: "Product 2", price: "$15" },
+        { name: "Product 3", price: "$20" },
+        { name: "Product 4", price: "$25" },
+        { name: "Product 5", price: "$30" },
+    ];
 
     function getLocation() {
         if (navigator.geolocation) {
@@ -104,7 +127,7 @@
         longitude = position.coords.longitude;
         document.getElementById("locationOutput").innerHTML = 
             `Latitude: ${latitude.toFixed(6)}<br>Longitude: ${longitude.toFixed(6)}`;
-        document.getElementById("mapButton").style.display = "inline-block";  // Show the "Open in Google Maps" button
+        document.getElementById("mapButton").style.display = "inline-block"; // Show the "Open in Google Maps" button
         checkDistance();
     }
 
@@ -141,11 +164,14 @@
     function checkDistance() {
         const distance = calculateDistance(latitude, longitude, warehouseLocation.latitude, warehouseLocation.longitude);
         const messageElement = document.getElementById("productMessage");
+        const productListElement = document.getElementById("productList");
 
         if (distance <= 4) {
             messageElement.innerHTML = "Products are available for delivery!";
+            displayProducts();
         } else {
             messageElement.innerHTML = "Sorry, we do not deliver to your location.";
+            productListElement.style.display = "none"; // Hide the product list
         }
 
         messageElement.style.display = "block"; // Show the product message
@@ -166,6 +192,18 @@
 
     function degreesToRadians(degrees) {
         return degrees * (Math.PI / 180);
+    }
+
+    function displayProducts() {
+        const productListElement = document.getElementById("productList");
+        productListElement.innerHTML = ""; // Clear previous products
+        products.forEach(product => {
+            const productDiv = document.createElement("div");
+            productDiv.classList.add("product");
+            productDiv.innerHTML = `${product.name} - ${product.price}`;
+            productListElement.appendChild(productDiv);
+        });
+        productListElement.style.display = "block"; // Show the product list
     }
 
 </script>
