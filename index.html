@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zolow - Warehouse Product Delivery</title>
     <style>
-        /* Similar styling as before for theme and layout */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #fff;
@@ -25,6 +24,7 @@
             justify-content: center;
             background-color: #ff9800;
             padding: 15px;
+            position: relative;
         }
 
         .header img {
@@ -102,6 +102,9 @@
             margin: 5px 0;
             background-color: #ffffff;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .product-card h3 {
@@ -114,12 +117,62 @@
             font-size: 1rem;
             color: #333;
         }
+
+        .add-to-cart {
+            background-color: #ff9800;
+            border: none;
+            padding: 8px 12px;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .add-to-cart:hover {
+            background-color: #e68900;
+        }
+
+        .cart {
+            margin-top: 20px;
+            border: 1px solid #007bff;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #f8f9fa;
+        }
+
+        .cart h2 {
+            margin: 0;
+            color: #ff9800;
+        }
+
+        .cart-item {
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .cart-item span {
+            color: #007bff;
+        }
+
+        .checkout-button {
+            padding: 12px 25px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .checkout-button:hover {
+            background-color: #218838;
+        }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <!-- Logo Image -->
     <img src="logo.png" alt="Zolow Logo">
 </div>
 
@@ -131,6 +184,12 @@
     <button id="mapButton" onclick="openMap()">Open in Google Maps</button>
 
     <div id="nearestWarehouses" class="nearest-warehouse-list"></div>
+
+    <div id="cart" class="cart">
+        <h2>My Cart</h2>
+        <div id="cartItems"></div>
+        <button class="checkout-button" onclick="checkout()">Checkout</button>
+    </div>
 </div>
 
 <script>
@@ -157,6 +216,7 @@
     ];
 
     let latitude, longitude;
+    let cart = [];
 
     function getLocation() {
         if (navigator.geolocation) {
@@ -224,26 +284,54 @@
                 warehouse.products.forEach(product => {
                     const productCard = document.createElement('div');
                     productCard.className = 'product-card';
-                    productCard.innerHTML = `<h3>${product}</h3><p>Available at ${warehouse.name}</p>`;
-                    warehouseItem.appendChild(productCard); // Append product card to the warehouse item
+                    productCard.innerHTML = `
+                        <h3>${product}</h3>
+                        <p>Available at ${warehouse.name}</p>
+                        <button class="add-to-cart" onclick="addToCart('${product}')">Add to Cart</button>
+                    `;
+                    warehouseItem.appendChild(productCard);
                 });
             } else {
-                warehouseItem.innerHTML += `<p>No products available within 4 km.</p>`;
+                warehouseItem.innerHTML += "<p>No products available within 4 km.</p>";
             }
-
             list.appendChild(warehouseItem);
         });
+    }
 
-        if (!list.hasChildNodes()) {
-            list.innerHTML = `<p>No warehouses found within 4 km radius.</p>`;
+    function addToCart(product) {
+        cart.push(product);
+        updateCart();
+    }
+
+    function updateCart() {
+        const cartItemsDiv = document.getElementById('cartItems');
+        cartItemsDiv.innerHTML = ''; // Clear previous cart items
+
+        if (cart.length === 0) {
+            cartItemsDiv.innerHTML = '<p>No items in the cart.</p>';
+            document.querySelector('.checkout-button').style.display = 'none';
+            return;
         }
+
+        cart.forEach(item => {
+            const cartItem = document.createElement('div');
+            cartItem.className = 'cart-item';
+            cartItem.innerHTML = `<span>${item}</span>`;
+            cartItemsDiv.appendChild(cartItem);
+        });
+
+        document.querySelector('.checkout-button').style.display = 'inline-block';
+    }
+
+    function checkout() {
+        alert("Proceeding to payment...");
+        // Here you can integrate a payment system
     }
 
     function openMap() {
-        const mapUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
-        window.open(mapUrl, '_blank');
+        const url = `https://www.google.com/maps/@${latitude},${longitude},15z`;
+        window.open(url, '_blank');
     }
 </script>
-
 </body>
 </html>
