@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zoloww - Warehouse Product Delivery</title>
+    <title>Zolow - Warehouse Product Delivery</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -76,7 +76,7 @@
         }
 
         #mapButton:hover {
-            background-color: #ff9800;
+            background-color: #e68900;
         }
 
         .nearest-warehouse-list {
@@ -91,7 +91,6 @@
             background-color: #f8f9fa;
             border-left: 5px solid #ff9800;
             border-radius: 8px;
-            position: relative;
         }
 
         .product-card {
@@ -110,14 +109,6 @@
             font-size: 1.2rem;
             color: #ff9800;
         }
-
-        .product-card p {
-            margin: 0;
-            font-size: 1rem;
-            color: #333;
-        }
-
-        
 
         .cart {
             margin-top: 20px;
@@ -157,71 +148,49 @@
             background-color: #218838;
         }
 
+        /* Plus Button Styling */
+        .plusButton {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid white;
+            width: 2.5rem;
+            height: 2.5rem;
+            background-color: #ff9800;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
 
+        .plusButton::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-width: 0 0.9rem 0.9rem 0;
+            border-style: solid;
+            border-color: transparent white transparent transparent;
+            transition: all 0.3s ease-in-out;
+        }
 
-        /* From Uiverse.io by OnCloud125252 */ 
-/* Note that you only needs to edit the config to customize the button! */
+        .plusButton:hover::before {
+            border-width: 0 2.5rem 2.5rem 0;
+        }
 
-.plusButton {
-  /* Config start */
-  --plus_sideLength: 2.5rem;
-  --plus_topRightTriangleSideLength: 0.9rem;
-  /* Config end */
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 1px solid white;
-  width: var(--plus_sideLength);
-  height: var(--plus_sideLength);
-  background-color: #ff9800;
-  overflow: hidden;
-}
+        .plusButton .plusIcon {
+            fill: white;
+            width: 1.75rem;
+            height: 1.75rem;
+            transition: transform 0.3s ease-in-out;
+        }
 
-.plusButton::before {
-  position: absolute;
-  content: "";
-  top: 0;
-  right: 0;
-  width: 0;
-  height: 0;
-  border-width: 0 var(--plus_topRightTriangleSideLength) var(--plus_topRightTriangleSideLength) 0;
-  border-style: solid;
-  border-color: transparent white transparent transparent;
-  transition-timing-function: ease-in-out;
-  transition-duration: 0.2s;
-}
-
-.plusButton:hover {
-  cursor: pointer;
-}
-
-.plusButton:hover::before {
-  --plus_topRightTriangleSideLength: calc(var(--plus_sideLength) * 2);
-}
-
-.plusButton:focus-visible::before {
-  --plus_topRightTriangleSideLength: calc(var(--plus_sideLength) * 2);
-}
-
-.plusButton>.plusIcon {
-  fill: white;
-  width: calc(var(--plus_sideLength) * 0.7);
-  height: calc(var(--plus_sideLength) * 0.7);
-  z-index: 1;
-  transition-timing-function: ease-in-out;
-  transition-duration: 0.2s;
-}
-
-.plusButton:hover>.plusIcon {
-  fill: #ff9800;
-  transform: rotate(180deg);
-}
-
-.plusButton:focus-visible>.plusIcon {
-  fill: #ff9800;
-  transform: rotate(180deg);
-}
+        .plusButton:hover .plusIcon {
+            transform: rotate(180deg);
+            fill: #ff9800;
+        }
     </style>
 </head>
 <body>
@@ -231,7 +200,7 @@
 </div>
 
 <div class="container">
-    <h1>Zoloww</h1>
+    <h1>Zolow</h1>
     <h2>Warehouse Product Delivery</h2>
     <button onclick="getLocation()">Get Location</button>
     <p id="locationOutput"></p>
@@ -240,14 +209,13 @@
     <div id="nearestWarehouses" class="nearest-warehouse-list"></div>
 
     <div id="cart" class="cart">
-        <h2>My Cart</h2>
+        <h2>My Cart</2>
         <div id="cartItems"></div>
         <button class="checkout-button" onclick="checkout()">Checkout</button>
     </div>
 </div>
 
 <script>
-    // Sample warehouse data with products
     const warehouseLocations = [
         {
             name: "Main Warehouse",
@@ -310,7 +278,6 @@
         }
     }
 
-    // Haversine formula to calculate distance in km between two lat/lon points
     function calculateDistance(lat1, lon1, lat2, lon2) {
         const R = 6371; // Radius of the Earth in km
         const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -319,48 +286,55 @@
                   Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
                   Math.sin(dLon / 2) * Math.sin(dLon / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        const distance = R * c; // Distance in km
-        return distance;
+        return R * c; // Distance in km
     }
 
     function findNearestWarehouses() {
         const warehousesWithDistances = warehouseLocations.map(warehouse => {
             const distance = calculateDistance(latitude, longitude, warehouse.latitude, warehouse.longitude);
-            return { ...warehouse, distance }; // Add distance to each warehouse object
+            return { ...warehouse, distance };
+        }).sort((a, b) => a.distance - b.distance);
+
+        displayNearestWarehouses(warehousesWithDistances);
+    }
+
+    function displayNearestWarehouses(warehouses) {
+    const nearestWarehousesDiv = document.getElementById("nearestWarehouses");
+    nearestWarehousesDiv.innerHTML = "";
+
+    const warehousesWithinRange = warehouses.filter(warehouse => warehouse.distance <= 4);
+
+    if (warehousesWithinRange.length === 0) {
+        nearestWarehousesDiv.innerHTML = `<p>No services in this location for 4 km radius</p>`;
+    } else {
+        warehousesWithinRange.forEach(warehouse => {
+            const warehouseDiv = document.createElement("div");
+            warehouseDiv.className = "nearest-warehouse-item";
+            warehouseDiv.innerHTML = `
+                <strong>${warehouse.name}</strong> (${warehouse.distance.toFixed(2)} km away)
+                <div id="products-${warehouse.name}" class="product-list"></div>
+            `;
+            nearestWarehousesDiv.appendChild(warehouseDiv);
+            displayProducts(warehouse);
         });
+    }
+}
 
-        // Sort warehouses by distance (ascending order)
-        warehousesWithDistances.sort((a, b) => a.distance - b.distance);
 
-        const list = document.getElementById('nearestWarehouses');
-        list.innerHTML = ''; // Clear previous results
-
-        warehousesWithDistances.forEach(warehouse => {
-            const warehouseItem = document.createElement('div');
-            warehouseItem.className = 'nearest-warehouse-item';
-            warehouseItem.innerHTML = `<strong>${warehouse.name}</strong><br>Distance: ${warehouse.distance.toFixed(2)} km`;
-
-            // Check if the warehouse is within 4 km to display products
-            if (warehouse.distance <= 4) {
-                warehouse.products.forEach(product => {
-                    const productCard = document.createElement('div');
-                    productCard.className = 'product-card';
-                    productCard.innerHTML = `
-                        <h3>${product}</h3>
-                        <div tabindex="0" class="plusButton"onclick="addToCart('${product}')">
-                        <svg class="plusIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30">
-                        <g mask="url(#mask0_21_345)">
-                        <path d="M13.75 23.75V16.25H6.25V13.75H13.75V6.25H16.25V13.75H23.75V16.25H16.25V23.75H13.75Z"></path>
-                        </g>
-                        </svg>
-                        </div>
-                    `;
-                    warehouseItem.appendChild(productCard);
-                });
-            } else {
-                warehouseItem.innerHTML += "<p>No products available within 4 km.</p>";
-            }
-            list.appendChild(warehouseItem);
+    function displayProducts(warehouse) {
+        const productList = document.getElementById(`products-${warehouse.name}`);
+        warehouse.products.forEach(product => {
+            const productDiv = document.createElement("div");
+            productDiv.className = "product-card";
+            productDiv.innerHTML = `
+                <h3>${product}</h3>
+                <div class="plusButton" onclick="addToCart('${product}')">
+                    <svg class="plusIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                </div>
+            `;
+            productList.appendChild(productDiv);
         });
     }
 
@@ -370,33 +344,34 @@
     }
 
     function updateCart() {
-        const cartItemsDiv = document.getElementById('cartItems');
-        cartItemsDiv.innerHTML = ''; // Clear previous cart items
-
-        if (cart.length === 0) {
-            cartItemsDiv.innerHTML = '<p>No items in the cart.</p>';
-            document.querySelector('.checkout-button').style.display = 'none';
-            return;
-        }
-
+        const cartItemsDiv = document.getElementById("cartItems");
+        cartItemsDiv.innerHTML = "";
         cart.forEach(item => {
-            const cartItem = document.createElement('div');
-            cartItem.className = 'cart-item';
-            cartItem.innerHTML = `<span>${item}</span>`;
-            cartItemsDiv.appendChild(cartItem);
+            const cartItemDiv = document.createElement("div");
+            cartItemDiv.className = "cart-item";
+            cartItemDiv.innerHTML = `<span>${item}</span>`;
+            cartItemsDiv.appendChild(cartItemDiv);
         });
 
-        document.querySelector('.checkout-button').style.display = 'inline-block';
+        const cartCount = cart.length;
+        document.querySelector('.cart h2').innerHTML = `My Cart (${cartCount})`;
+
+        if (cartCount > 0) {
+            document.querySelector('.checkout-button').style.display = "inline-block";
+        } else {
+            document.querySelector('.checkout-button').style.display = "none";
+        }
     }
 
     function checkout() {
-        alert("Proceeding to payment...");
-        // Here you can integrate a payment system
+        alert("Proceeding to checkout with the following items:\n" + cart.join(", "));
+        cart = [];
+        updateCart();
     }
 
     function openMap() {
-        const url = `https://www.google.com/maps/@${latitude},${longitude},15z`;
-        window.open(url, '_blank');
+        const googleMapsUrl = `https://www.google.com/maps/?q=${latitude},${longitude}`;
+        window.open(googleMapsUrl, '_blank');
     }
 </script>
 </body>
